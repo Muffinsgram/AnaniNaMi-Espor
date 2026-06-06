@@ -42,3 +42,38 @@ html,
 body {
     scroll-behavior: smooth;
 }
+
+
+/* --- ÖZEL SCROLLBAR TASARIMI --- */
+
+/* Scrollbar'ın genel kalınlığı */
+::-webkit-scrollbar {
+    width: 10px;
+    /* Dikey scroll kalınlığı */
+    height: 8px;
+    /* Yatay scroll kalınlığı (Harita seçici vb. için) */
+}
+
+/* Scrollbar arka planı (Kızak/Track) */
+::-webkit-scrollbar-track {
+    background: #0B0C10;
+    /* Sitenin karanlık arka planına tam uyum */
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    /* Sınırı belli eden çok ince bir çizgi */
+}
+
+/* Kaydırdığımız çubuk (Thumb) */
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    /* Normalde yarı saydam, zarif bir gri */
+    border-radius: 10px;
+    /* Tam yuvarlak köşeler */
+    border: 2px solid #0B0C10;
+    /* Kızakla aynı renk border vererek çubuğun kenarlarında boşluk varmış efekti (padding) yaratıyoruz */
+}
+
+/* Çubuğun üzerine fareyle gelindiğinde (Hover) */
+::-webkit-scrollbar-thumb:hover {
+    background: #ef4444;
+    /* Fareyle üzerine gelince takımın rengine (Kırmızı/Primary) dönüşür */
+}

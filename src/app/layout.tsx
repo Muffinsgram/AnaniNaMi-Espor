@@ -5,10 +5,11 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { ColorProvider } from "@/components/ColorProvider";
 import NextTopLoader from "nextjs-toploader"; // Yükleme animasyonu paketi
 import { Toaster } from "sonner";
+import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Valorant E-Spor Takımı",
-  description: "Premier Valorant Takımı Yönetim ve Taraftar Portalı",
+  title: "Anani Na'Mi Valorant E-Spor Takımı",
+  description: "Anani Na'Mi E-Sport takımı olarak tüm premieri elden geçirmeye gelmiş bir takım bunlar geleceğin yıldızları| Anani Na'Mi E-Sport",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="flex-grow">
                 {children}
               </div>
+              <Footer />
             </ColorProvider>
           </AuthProvider>
         </ThemeProvider>
@@ -42,3 +44,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

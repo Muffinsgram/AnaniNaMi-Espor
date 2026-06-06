@@ -15,7 +15,7 @@ export default function Loading() {
 
                 {/* Takım Logosu Animasyonu */}
                 <div className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-8 flex items-center">
-                    TEAM
+                    Anani
                     <motion.span
                         animate={{
                             opacity: [0.4, 1, 0.4],
@@ -24,7 +24,7 @@ export default function Loading() {
                         transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                         className="text-primary ml-0.5"
                     >
-                        VAL
+                        Na'Mi
                     </motion.span>
                 </div>
 
@@ -50,7 +50,7 @@ export default function Loading() {
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     className="mt-6 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]"
                 >
-                    Sistem Hazırlanıyor...
+                    Yükleniyor Bekleyiniz...
                 </motion.p>
 
             </motion.div>

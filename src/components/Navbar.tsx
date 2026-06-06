@@ -23,7 +23,7 @@ export default function Navbar() {
 
                 <div className="hidden md:flex gap-8 items-center font-medium text-sm text-gray-700 dark:text-gray-300">
                     <Link href="/kadro" className="hover:text-primary transition-colors duration-300 uppercase tracking-wider text-xs font-bold">Kadro</Link>
-                    <Link href="/fikstur" className="hover:text-primary transition-colors duration-300 uppercase tracking-wider text-xs font-bold">Fikstür</Link>
+                    <Link href="/fikstur" className="hover:text-primary transition-colors duration-300 uppercase tracking-wider text-xs font-bold">Maçlar</Link>
 
                     {session && (
                         <Link href="/taktik-odasi" className="text-primary hover:text-primary/80 transition-colors duration-300 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 shadow-[0_0_10px_rgba(var(--primary-rgb),0.2)]">

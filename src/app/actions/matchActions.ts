@@ -10,7 +10,8 @@ export async function createMatch(data: { opponent: string, date: Date, map: str
             opponent: data.opponent,
             date: data.date,
             map: data.map,
-            status: "UPCOMING"
+            status: "UPCOMING",
+            score: "0-0" // Başlangıç skoru
         }
     });
     revalidatePath("/admin");
@@ -18,17 +19,27 @@ export async function createMatch(data: { opponent: string, date: Date, map: str
     return { success: true };
 }
 
-// 2. Maçları Çekme (Hata aldığın eksik fonksiyon)
+// 2. Skor ve Durum Güncelleme (Eksik olan fonksiyon buydu)
+export async function updateMatchScore(id: string, score: string, status: string) {
+    await prisma.match.update({
+        where: { id },
+        data: { score, status }
+    });
+    revalidatePath("/admin");
+    revalidatePath("/fikstur");
+}
+
+// 3. Maçları Çekme
 export async function getMatches() {
     return await prisma.match.findMany({
         orderBy: { date: 'asc' }
     });
 }
 
-// 3. Maç Silme (Hata aldığın eksik fonksiyon)
+// 4. Maç Silme
 export async function deleteMatch(id: string) {
     await prisma.match.delete({
-        where: { id: id }
+        where: { id }
     });
     revalidatePath("/admin");
     revalidatePath("/fikstur");

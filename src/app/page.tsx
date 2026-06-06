@@ -71,7 +71,7 @@ export default function Home() {
             </a>
           </button>
           <button onClick={() => window.location.href = "/fikstur"} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 px-8 py-3.5 rounded-2xl font-bold transition-all shadow-sm">
-            Fikstürü İncele
+            Maçları İncele
           </button>
         </motion.div>
       </motion.div>
