@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  authorId  String   @db.ObjectId
+}
+
+model User {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  role            String    @default("USER")
+
+  // Valorant & Takım Bilgileri
+  riotId          String?
+  rank            String?
+  kdRatio         Float?
+  favoriteAgent   String?
+  teamRole        String    @default("TARAFTAR")
+  isTrackerLinked Boolean   @default(false)
+
+  // Profil Özelleştirmeleri
+  bio             String?
+  customAvatar    String?
+  customBanner    String?
+
+  // Sosyal Medya (Dinamik Yönetim İçin JSON)
+  socialLinks     Json?     // [{ "platform": "twitter", "url": "..." }, { ... }]
+
+  // Eski tip tekil alanlar (İstersen bunları zamanla kaldırabilirsin)
+  twitterUrl      String?
+  twitchUrl       String?
+  instagramUrl    String?
+  kickUrl         String?
+  youtubeUrl      String?
+  tiktokUrl       String?
+
+  accounts        Account[]
+  sessions        Session[]
+}
+
+
+model Match {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  opponent  String   // Rakip takım adı
+  date      DateTime // Maçın tarihi ve saati
+  map       String   // Harita (Örn: Ascent, Haven, vb.)
+  status    String   @default("UPCOMING") // UPCOMING, LIVE, COMPLETED
+  createdAt DateTime @default(now())
+}

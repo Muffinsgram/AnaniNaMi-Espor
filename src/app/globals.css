@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+    /* Tailwind'e 'primary' adında yeni bir renk sınıfı öğretiyoruz */
+    --color-primary: var(--primary);
+    --color-primary-hover: var(--primary-hover);
+}
+
+/* Varsayılan Rengimiz: Rose (Valorant Kırmızısına yakın) */
+:root {
+    --primary: #f43f5e;
+    --primary-hover: #e11d48;
+}
+
+/* HTML etiketine eklenecek 'data-color' durumuna göre renkler değişecek */
+[data-color="rose"] {
+    --primary: #f43f5e;
+    --primary-hover: #e11d48;
+}
+
+[data-color="violet"] {
+    --primary: #8b5cf6;
+    --primary-hover: #7c3aed;
+}
+
+[data-color="emerald"] {
+    --primary: #10b981;
+    --primary-hover: #059669;
+}
+
+[data-color="sky"] {
+    --primary: #0ea5e9;
+    --primary-hover: #0284c7;
+}
+
+[data-color="amber"] {
+    --primary: #f59e0b;
+    --primary-hover: #d97706;
+}
+
+html,
+body {
+    scroll-behavior: smooth;
+}
