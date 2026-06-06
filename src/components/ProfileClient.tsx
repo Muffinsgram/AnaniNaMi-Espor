@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import SocialSelector, { iconMap } from "./SocialSelector";
 import { UploadDropzone } from "@uploadthing/react";
-import type { OurFileRouter } from "@/app/api/uploadthing/core";
+import type { OurFileRouter } from "@/lib/uploadthing";
 
 
 export default function ProfileClient({ initialUser }: { initialUser: any }) {
@@ -105,7 +105,7 @@ export default function ProfileClient({ initialUser }: { initialUser: any }) {
                             container:
                                 "border-2 border-dashed border-white/10 rounded-3xl bg-white/5 p-8 cursor-pointer",
                         }}
-                        onClientUploadComplete={async (res: any) => {
+                        onClientUploadComplete={async (res) => {
                             await updateProfileFields({ customAvatar: res[0].url });
                             setUser({ ...user, customAvatar: res[0].url });
                             toast.success("Fotoğraf güncellendi!");
