@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { UploadDropzone } from "@/utils/uploadthing";
 import { updateProfileFields } from "@/app/actions/updateProfileFields";
 import { User, Save, Loader2, Trash2, Award } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import SocialSelector, { iconMap } from "./SocialSelector";
+import { UploadDropzone } from "@uploadthing/react";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
+
 
 export default function ProfileClient({ initialUser }: { initialUser: any }) {
     const [user, setUser] = useState(initialUser);
@@ -97,10 +99,13 @@ export default function ProfileClient({ initialUser }: { initialUser: any }) {
 
                 <div className="space-y-6">
                     <h2 className="text-xl font-bold text-white flex items-center gap-2"><Award size={20} className="text-primary" /> Profil Görseli</h2>
-                    <UploadDropzone
+                    <UploadDropzone<OurFileRouter, "avatarUploader">
                         endpoint="avatarUploader"
-                        appearance={{ container: "border-2 border-dashed border-white/10 rounded-3xl bg-white/5 p-8 cursor-pointer" }}
-                        onClientUploadComplete={async (res) => {
+                        appearance={{
+                            container:
+                                "border-2 border-dashed border-white/10 rounded-3xl bg-white/5 p-8 cursor-pointer",
+                        }}
+                        onClientUploadComplete={async (res: any) => {
                             await updateProfileFields({ customAvatar: res[0].url });
                             setUser({ ...user, customAvatar: res[0].url });
                             toast.success("Fotoğraf güncellendi!");
