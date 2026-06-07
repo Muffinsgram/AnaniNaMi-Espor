@@ -42,8 +42,7 @@ export default function AdminPanel() {
     const [scoreInputs, setScoreInputs] = useState<{ [key: string]: string }>({});
     const [statusInputs, setStatusInputs] = useState<{ [key: string]: string }>({});
 
-    const ADMIN_EMAIL = "hozpinar419@gmail.com";
-
+    // Verileri Çekme İşlemi (Discord Rolüne Göre Kontrol Ediliyor)
     useEffect(() => {
         async function fetchData() {
             try {
@@ -72,8 +71,13 @@ export default function AdminPanel() {
                 setLoading(false);
             }
         }
-        if (session?.user?.email === ADMIN_EMAIL) fetchData();
-        else if (status !== "loading") setLoading(false);
+
+        // E-posta kontrolü kalktı, NextAuth'tan gelen isAdmin boolean alanına bakılıyor
+        if ((session?.user as any)?.isAdmin) {
+            fetchData();
+        } else if (status !== "loading") {
+            setLoading(false);
+        }
     }, [session, status]);
 
     const handleToggleRole = async (userId: string, currentRole: string) => {
@@ -133,11 +137,12 @@ export default function AdminPanel() {
 
     if (status === "loading" || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>;
 
-    if (session?.user?.email !== ADMIN_EMAIL) return (
+    // Discord sunucusunda belirlenen yetki rolüne sahip olmayanlar içeri alınmaz
+    if (!(session?.user as any)?.isAdmin) return (
         <div className="min-h-screen flex flex-col items-center justify-center pt-24 px-4 text-center">
             <ShieldAlert size={64} className="text-red-500 mb-6" />
             <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Gizli Bölge</h1>
-            <p className="text-gray-500">Bu sayfaya sadece Takım Kaptanı erişebilir.</p>
+            <p className="text-gray-500">Bu sayfaya sadece Discord sunucusunda gerekli yetki rolüne sahip kişiler erişebilir.</p>
         </div>
     );
 
@@ -263,7 +268,7 @@ export default function AdminPanel() {
                     </div>
                 </div>
 
-                {/* 2. MODÜL: KADRO YÖNETİMİ (KODUN AYNI KALACAK) */}
+                {/* 2. MODÜL: KADRO YÖNETİMİ */}
                 <div className="bg-white/50 dark:bg-gray-900/40 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-[2rem] shadow-2xl overflow-hidden">
                     <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
