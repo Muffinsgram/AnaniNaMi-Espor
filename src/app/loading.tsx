@@ -1,59 +1,47 @@
-"use client";
-
-import { motion } from "framer-motion";
+import React from 'react';
 
 export default function Loading() {
+    // Uiverse'deki o özel yıldız şeklini çizen koordinatlar
+    const starClipPath = "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)";
+
+    // 5 Farklı katman: Her biri farklı boyutta, farklı renkte ve gecikmeli (delay) dönüyor
+    const cracks = [
+        { size: "w-[40px] md:w-[60px]", delay: "0s", color: "bg-white" },
+        { size: "w-[50px] md:w-[75px]", delay: "-1s", color: "bg-white/80" },
+        { size: "w-[60px] md:w-[90px]", delay: "-1.5s", color: "bg-primary/70" },
+        { size: "w-[70px] md:w-[105px]", delay: "-2s", color: "bg-primary/40" },
+        { size: "w-[80px] md:w-[120px]", delay: "-2.5s", color: "bg-primary/20" },
+    ];
+
     return (
-        <div className="w-full min-h-[75vh] flex items-center justify-center px-4">
+        <div className="w-full min-h-[70vh] flex flex-col items-center justify-center px-4">
 
-            {/* Cam Efektli Loading Kartı */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-2xl border border-gray-200 dark:border-gray-800 p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center justify-center max-w-sm w-full"
-            >
+            {/* Ortadaki Parlama Efekti */}
+            <div className="relative flex items-center justify-center drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">
 
-                {/* Takım Logosu Animasyonu */}
-                <div className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-8 flex items-center">
-                    Anani
-                    <motion.span
-                        animate={{
-                            opacity: [0.4, 1, 0.4],
-                            textShadow: ["0px 0px 0px var(--primary)", "0px 0px 20px var(--primary)", "0px 0px 0px var(--primary)"]
-                        }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        className="text-primary ml-0.5"
-                    >
-                        Na'Mi
-                    </motion.span>
-                </div>
-
-                {/* Çok Zarif Kayan Yükleme Çizgisi (Apple / Vercel Tarzı) */}
-                <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden relative shadow-inner">
-                    <motion.div
-                        className="absolute top-0 bottom-0 bg-primary rounded-full shadow-[0_0_10px_var(--primary)]"
-                        animate={{
-                            left: ["-50%", "100%"],
-                            width: ["30%", "40%", "30%"]
-                        }}
-                        transition={{
-                            repeat: Infinity,
-                            duration: 1.5,
-                            ease: "easeInOut"
+                {/* Yıldızların Döngüsü */}
+                {cracks.map((crack, i) => (
+                    <div
+                        key={i}
+                        className={`absolute aspect-square ${crack.size} ${crack.color}`}
+                        style={{
+                            clipPath: starClipPath,
+                            // Tailwind'in varsayılan spin keyframe'ini kullanarak 6 saniyelik dönüş veriyoruz
+                            animation: `spin 6s linear infinite`,
+                            animationDelay: crack.delay
                         }}
                     />
-                </div>
+                ))}
 
-                {/* Nefes Alan Açıklama Metni */}
-                <motion.p
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    className="mt-6 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]"
-                >
-                    Yükleniyor Bekleyiniz...
-                </motion.p>
+                {/* Arka Planda Glow (Işık Yayılımı) */}
+                <div className="absolute w-24 h-24 bg-primary/30 blur-2xl rounded-full animate-pulse" />
+            </div>
 
-            </motion.div>
+            {/* Alt Bilgi Metni */}
+            <div className="mt-32 text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-[0.4em] animate-pulse">
+                AnaniNa'Mi E-Sport
+            </div>
+
         </div>
     );
 }

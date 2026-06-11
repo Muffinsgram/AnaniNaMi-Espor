@@ -2,11 +2,12 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldAlert, Users, ShieldCheck, UserX, UserCheck, Gamepad2, Loader2, Sword, Calendar, Plus, Trash2, MapPin, Trophy, Save, X, Image as ImageIcon } from "lucide-react";
+import { ShieldAlert, Users, ShieldCheck, UserX, UserCheck, Gamepad2, Loader2, Sword, Calendar, Plus, Trash2, MapPin, Trophy, Save, X, Image as ImageIcon, Play } from "lucide-react";
 import { togglePlayerRole } from "@/app/actions/adminActions";
 import { getAnnouncements } from "@/app/actions/announcement";
 import { getMatches, createMatch, deleteMatch, updateMatchScore } from "@/app/actions/matchActions";
 import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
+import AddClipForm from "@/components/AddClipForm"; // YENİ: Klip Formu Eklendi
 import { toast } from "sonner";
 
 const VALORANT_MAPS = [
@@ -42,7 +43,6 @@ export default function AdminPanel() {
     const [scoreInputs, setScoreInputs] = useState<{ [key: string]: string }>({});
     const [statusInputs, setStatusInputs] = useState<{ [key: string]: string }>({});
 
-    // Verileri Çekme İşlemi (Discord Rolüne Göre Kontrol Ediliyor)
     useEffect(() => {
         async function fetchData() {
             try {
@@ -72,7 +72,6 @@ export default function AdminPanel() {
             }
         }
 
-        // E-posta kontrolü kalktı, NextAuth'tan gelen isAdmin boolean alanına bakılıyor
         if ((session?.user as any)?.isAdmin) {
             fetchData();
         } else if (status !== "loading") {
@@ -137,7 +136,6 @@ export default function AdminPanel() {
 
     if (status === "loading" || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>;
 
-    // Discord sunucusunda belirlenen yetki rolüne sahip olmayanlar içeri alınmaz
     if (!(session?.user as any)?.isAdmin) return (
         <div className="min-h-screen flex flex-col items-center justify-center pt-24 px-4 text-center">
             <ShieldAlert size={64} className="text-red-500 mb-6" />
@@ -181,6 +179,7 @@ export default function AdminPanel() {
 
             <div className="max-w-5xl mx-auto space-y-12">
 
+                {/* 1. MODÜL: MAÇ MERKEZİ */}
                 <div className="bg-[#0B0C10]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden p-6 relative">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] pointer-events-none"></div>
 
@@ -332,7 +331,22 @@ export default function AdminPanel() {
                     </div>
                 </div>
 
+                {/* 3. MODÜL: DUYURULAR */}
                 <AdminAnnouncements initialAnnouncements={announcements} />
+
+                {/* 4. MODÜL: MEDYA VE KLİP MERKEZİ (YENİ EKLENEN KISIM) */}
+                <div className="bg-[#0B0C10]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden p-6 relative flex flex-col items-center">
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-red-500/10 blur-[100px] pointer-events-none"></div>
+
+                    <div className="w-full flex items-center gap-3 mb-8 relative z-10">
+                        <div className="p-3 bg-red-500/20 text-red-500 rounded-xl"><Play size={24} /></div>
+                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Medya Merkezi</h2>
+                    </div>
+
+                    <div className="w-full flex justify-center relative z-10">
+                        <AddClipForm />
+                    </div>
+                </div>
 
             </div>
         </main>

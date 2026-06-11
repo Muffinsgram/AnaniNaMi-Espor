@@ -3,23 +3,33 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getAnnouncements } from "@/app/actions/announcement";
+import { getClips } from "@/app/actions/clipActions"; // YENİ EKLENDİ
 import AnnouncementPanel from "@/components/AnnouncementPanel";
+import NetflixGallery from "@/components/NetflixGallery"; // YENİ EKLENDİ
 
 export default function Home() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [clips, setClips] = useState<any[]>([]); // Klipler için state
 
   useEffect(() => {
-    // Sayfa yüklendiğinde duyuruları veritabanından çekiyoruz
-    async function fetchAnnouncements() {
+    // Sayfa yüklendiğinde hem duyuruları hem klipleri eşzamanlı çekeriz
+    async function fetchData() {
       try {
-        const data = await getAnnouncements();
-        // Ana sayfada çok fazla kalabalık yapmaması için sadece son 4 duyuruyu gösteriyoruz
-        setAnnouncements(data.slice(0, 4));
+        const [announcementsData, clipsData] = await Promise.all([
+          getAnnouncements(),
+          getClips()
+        ]);
+
+        // Sadece son 4 duyuruyu göster
+        setAnnouncements(announcementsData.slice(0, 4));
+
+        // Tüm klipleri state'e aktar
+        setClips(clipsData);
       } catch (error) {
-        console.error("Duyurular çekilemedi:", error);
+        console.error("Veriler çekilemedi:", error);
       }
     }
-    fetchAnnouncements();
+    fetchData();
   }, []);
 
   return (
@@ -75,7 +85,19 @@ export default function Home() {
           </button>
         </motion.div>
       </motion.div>
-      {/* https://discord.gg/bDejPXQFvu */}
+
+      {/* ORTA KISIM: NETFLIX TARZI KLİP GALERİSİ */}
+      {clips.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55, duration: 0.7, ease: "easeOut" }}
+          className="w-full mt-16"
+        >
+          <NetflixGallery clips={clips} />
+        </motion.div>
+      )}
+
       {/* ALT KISIM: DUYURULAR BÖLÜMÜ */}
       {announcements.length > 0 && (
         <motion.div
@@ -84,7 +106,6 @@ export default function Home() {
           transition={{ delay: 0.6, duration: 0.7, ease: "easeOut" }}
           className="mt-12 w-full max-w-3xl text-left"
         >
-          {/* Ana sayfadaki kullanıcılara yeni duyuru ekleme butonu gözükmemesi için role="USER" gönderiyoruz */}
           <AnnouncementPanel announcements={announcements} userRole="USER" />
         </motion.div>
       )}
