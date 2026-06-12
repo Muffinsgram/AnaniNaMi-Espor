@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ShieldAlert, Zap } from "lucide-react";
+import { Menu, X, ShieldAlert, Zap, Trophy } from "lucide-react";
 import ColorPicker from "./ColorPicker";
 import ProfileDropdown from "./ProfileDropdown";
 
@@ -26,7 +26,6 @@ export default function Navbar() {
                 {/* MASAÜSTÜ MENÜ */}
                 <div className="hidden md:flex gap-8 items-center font-medium text-sm text-gray-700 dark:text-gray-300">
 
-                    {/* Alt Çizgili Kayan Link Efekti */}
                     <Link href="/kadro" className="group relative px-2 py-1">
                         <span className="relative z-10 uppercase tracking-widest text-xs font-bold transition-colors duration-300 group-hover:text-primary">Kadro</span>
                         <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 origin-right group-hover:origin-left group-hover:scale-x-100 transition-transform duration-300 ease-out rounded-full"></span>
@@ -35,6 +34,13 @@ export default function Navbar() {
                     <Link href="/fikstur" className="group relative px-2 py-1">
                         <span className="relative z-10 uppercase tracking-widest text-xs font-bold transition-colors duration-300 group-hover:text-primary">Maçlar</span>
                         <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 origin-right group-hover:origin-left group-hover:scale-x-100 transition-transform duration-300 ease-out rounded-full"></span>
+                    </Link>
+
+                    {/* YENİ: Liderlik Tablosu Linki */}
+                    <Link href="/liderlik" className="group relative px-2 py-1 flex items-center gap-1.5">
+                        <Trophy size={14} className="text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                        <span className="relative z-10 uppercase tracking-widest text-xs font-bold transition-colors duration-300 group-hover:text-yellow-500">Liderlik</span>
+                        <span className="absolute bottom-0 left-0 w-full h-[2px] bg-yellow-500 scale-x-0 origin-right group-hover:origin-left group-hover:scale-x-100 transition-transform duration-300 ease-out rounded-full"></span>
                     </Link>
 
                     {/* Taktik Odası (Işık Yansıma Efektli VIP Buton) */}
@@ -67,7 +73,7 @@ export default function Navbar() {
                         </motion.button>
                     )}
 
-                    {/* MOBİL HAMBURGER BUTONU (Yaylanma Animasyonlu) */}
+                    {/* MOBİL HAMBURGER BUTONU */}
                     <motion.button
                         whileTap={{ scale: 0.8, rotate: 90 }}
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -94,6 +100,10 @@ export default function Navbar() {
                             </Link>
                             <Link href="/fikstur" onClick={() => setIsMobileMenuOpen(false)} className="group text-xl font-black uppercase tracking-wider text-gray-900 dark:text-white hover:text-primary transition-colors flex items-center justify-between">
                                 Maçlar <span className="opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">→</span>
+                            </Link>
+                            {/* YENİ: Mobil Menü Liderlik Tablosu */}
+                            <Link href="/liderlik" onClick={() => setIsMobileMenuOpen(false)} className="group text-xl font-black uppercase tracking-wider text-yellow-500 hover:text-yellow-400 transition-colors flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Trophy size={20} /> Liderlik Tablosu</span> <span className="opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">→</span>
                             </Link>
 
                             {session && (
