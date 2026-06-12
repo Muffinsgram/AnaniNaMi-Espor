@@ -74,7 +74,7 @@ export default function ProfileClient({ initialUser }: { initialUser: any }) {
                         </div>
                         <div>
                             <label className="text-[10px] font-bold uppercase text-gray-400">Favori Ajan</label>
-                            <input {...register("favoriteAgent")} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-primary" />
+                            <input disabled {...register("favoriteAgent")} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-primary" />
                         </div>
                     </div>
 

@@ -17,45 +17,42 @@ async function getAdminData() {
     }
 }
 
-// Oyuncunun rolünü değiştirme
-export async function togglePlayerRole(userId: string, currentRole: string) {
+// Oyuncunun unvanını doğrudan günceller (KAPTAN, KOÇ, OYUNCU, YEDEK vb.)
+export async function updatePlayerRole(userId: string, newRole: string) {
     try {
-        const newRole = currentRole === "OYUNCU" ? "ÜYE" : "OYUNCU";
-
-        // Kimin rolünün değiştiğini bilmek için oyuncuyu buluyoruz
         const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+        if (!targetUser) return { error: "Kullanıcı bulunamadı." };
+
+        const oldRole = targetUser.teamRole || "ÜYE";
 
         await prisma.user.update({
             where: { id: userId },
             data: { teamRole: newRole },
         });
 
-        // 🚨 DISCORD GİZLİ LOG (Kadro Değişikliği)
-        if (targetUser) {
-            const admin = await getAdminData();
-            const isPromoted = newRole === "OYUNCU";
-
-            await sendDiscordLog({
-                module: "ROSTER",
-                title: isPromoted ? "🎯 Yeni Oyuncu As Kadroda!" : "⚠️ Oyuncu Kadrodan Çıkarıldı",
-                description: `**${targetUser.name}** (${targetUser.riotId || 'Riot ID Yok'}) adlı kişinin takım durumu güncellendi.`,
-                type: isPromoted ? "SUCCESS" : "WARNING",
-                fields: [
-                    { name: "Eski Durum", value: currentRole === "OYUNCU" ? "Kadroda" : "Bekliyor", inline: true },
-                    { name: "Yeni Durum", value: isPromoted ? "Kadroda" : "Bekliyor", inline: true }
-                ],
-                thumbnailUrl: targetUser.image || undefined,
-                isPublic: false,
-                adminName: admin.name,
-                adminImage: admin.image
-            });
-        }
+        // 🚨 DISCORD GİZLİ LOG (Scout Ekibi Unvan Güncelleme Raporu)
+        const admin = await getAdminData();
+        await sendDiscordLog({
+            module: "ROSTER",
+            title: `🎯 Kadro Unvanı Güncellendi: ${targetUser.name}`,
+            description: `**${targetUser.name}** adlı kullanıcının takımdaki unvanı değiştirildi.`,
+            type: "SUCCESS",
+            fields: [
+                { name: "Eski Unvan", value: oldRole, inline: true },
+                { name: "Yeni Unvan", value: newRole, inline: true }
+            ],
+            thumbnailUrl: targetUser.image || undefined,
+            isPublic: false,
+            adminName: admin.name,
+            adminImage: admin.image
+        });
 
         revalidatePath("/admin");
         revalidatePath("/kadro");
-        return { success: true, newRole };
+
+        return { success: true };
     } catch (error) {
-        console.error("Rol değiştirme hatası:", error);
+        console.error("Rol güncelleme hatası:", error);
         return { error: "İşlem sırasında bir hata oluştu." };
     }
 }

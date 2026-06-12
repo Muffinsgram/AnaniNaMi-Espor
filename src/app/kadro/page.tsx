@@ -6,8 +6,23 @@ export const revalidate = 0;
 
 export default async function KadroPage() {
     const players = await prisma.user.findMany({
-        where: { isTrackerLinked: true, teamRole: "OYUNCU" },
-        select: { id: true, name: true, image: true, riotId: true, favoriteAgent: true, teamRole: true, customAvatar: true, socialLinks: true, bio: true },
+        where: {
+            isTrackerLinked: true,
+            teamRole: {
+                in: ["OYUNCU", "KAPTAN", "KOÇ", "YEDEK"]
+            }
+        },
+        select: {
+            id: true,
+            name: true,
+            image: true,
+            riotId: true,
+            favoriteAgent: true,
+            teamRole: true,
+            customAvatar: true,
+            socialLinks: true,
+            bio: true
+        },
     });
 
     const res = await fetch("https://valorant-api.com/v1/agents?isPlayableCharacter=true&language=tr-TR");

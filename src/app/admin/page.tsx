@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldAlert, Users, ShieldCheck, UserX, UserCheck, Gamepad2, Loader2, Sword, Calendar, Plus, Trash2, MapPin, Trophy, Save, X, Image as ImageIcon, Play, Film, Star, Edit3 } from "lucide-react";
-import { togglePlayerRole } from "@/app/actions/adminActions";
+import { ShieldAlert, Users, ShieldCheck, UserX, UserCheck, Gamepad2, Loader2, Sword, Calendar, Plus, Trash2, MapPin, Trophy, Save, X, Image as ImageIcon, Play, Film, Star, Edit3, ChevronDown } from "lucide-react";
+import { updatePlayerRole } from "@/app/actions/adminActions";
 import { getAnnouncements } from "@/app/actions/announcement";
 import { getMatches, createMatch, deleteMatch, updateMatchScore } from "@/app/actions/matchActions";
 import { getClips, deleteClip, toggleFeaturedClip, updateClip } from "@/app/actions/clipActions";
@@ -28,6 +28,15 @@ const VALORANT_MAPS = [
 
 const FALLBACK_IMAGE = "https://images.contentstack.io/v3/assets/bltb6530b271fddd0b1/blt7b0f697dbaf2b719/60ee59955e82a01290356bc0/Valorant_Key_Art_1920x1080.jpg";
 
+// UNVAN SEÇENEKLERİ VE GÖRSEL AYARLARI
+const ROLE_OPTIONS = [
+    { value: "ÜYE", label: "ÜYE (BEKLEMEDE)", icon: "👤", color: "text-gray-400", bg: "bg-white/5 border-white/10 hover:bg-white/10" },
+    { value: "OYUNCU", label: "OYUNCU", icon: "🎮", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:bg-emerald-500/20" },
+    { value: "KAPTAN", label: "KAPTAN", icon: "👑", color: "text-yellow-500", bg: "bg-yellow-500/10 border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.15)] hover:bg-yellow-500/20" },
+    { value: "KOÇ", label: "KOÇ", icon: "🧠", color: "text-purple-500", bg: "bg-purple-500/10 border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:bg-purple-500/20" },
+    { value: "YEDEK", label: "YEDEK", icon: "⏳", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:bg-blue-500/20" }
+];
+
 export default function AdminPanel() {
     const { data: session, status } = useSession();
 
@@ -47,6 +56,9 @@ export default function AdminPanel() {
     const [statusInputs, setStatusInputs] = useState<{ [key: string]: string }>({});
 
     const [editingClip, setEditingClip] = useState<any | null>(null);
+
+    // YENİ: Rol seçimi yapılacak oyuncunun verisini tutan popup state'i
+    const [roleModalUser, setRoleModalUser] = useState<any | null>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -86,11 +98,15 @@ export default function AdminPanel() {
         }
     }, [session, status]);
 
-    const handleToggleRole = async (userId: string, currentRole: string) => {
+    const handleRoleChange = async (userId: string, newRole: string) => {
         setActionLoading(userId);
-        const res = await togglePlayerRole(userId, currentRole);
-        if (res.success) setUsers(users.map(u => u.id === userId ? { ...u, teamRole: res.newRole } : u));
-        else toast.error(res.error);
+        const res = await updatePlayerRole(userId, newRole);
+        if (res.success) {
+            setUsers(users.map(u => u.id === userId ? { ...u, teamRole: newRole } : u));
+            toast.success("Kadro unvanı başarıyla güncellendi! 🎯");
+        } else {
+            toast.error(res.error || "Hata oluştu.");
+        }
         setActionLoading(null);
     };
 
@@ -175,13 +191,49 @@ export default function AdminPanel() {
     if (!(session?.user as any)?.isAdmin) return (
         <div className="min-h-screen flex flex-col items-center justify-center pt-24 px-4 text-center">
             <ShieldAlert size={64} className="text-red-500 mb-6" />
-            <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Gizli Bölge</h1>
-            <p className="text-gray-500">Bu sayfaya sadece Discord sunucusunda gerekli yetki rolüne sahip kişiler erişebilir.</p>
+            <h1 className="text-4xl font-black text-white mb-2">Gizli Bölge</h1>
+            <p className="text-gray-500">Bu sayfaya sadece yetkili kişiler erişebilir.</p>
         </div>
     );
 
     return (
         <main className="w-full min-h-screen pt-32 px-4 pb-24 relative">
+
+            {/* YENİ: KADRO UNVAN SEÇİM MODALI (POPUP) */}
+            <AnimatePresence>
+                {roleModalUser && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="bg-[#1a1c23] border border-white/10 rounded-[2rem] p-6 md:p-8 w-full max-w-sm shadow-[0_0_50px_rgba(255,70,85,0.15)] relative">
+                            <button onClick={() => setRoleModalUser(null)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={24} /></button>
+
+                            <h3 className="text-2xl font-black text-white mb-1 flex items-center gap-2"><ShieldCheck className="text-primary" /> Unvan Ata</h3>
+                            <p className="text-sm text-gray-400 mb-6"><span className="text-white font-bold">{roleModalUser.name}</span> için yeni rol seçin.</p>
+
+                            <div className="flex flex-col gap-3">
+                                {ROLE_OPTIONS.map((role) => (
+                                    <button
+                                        key={role.value}
+                                        onClick={() => {
+                                            handleRoleChange(roleModalUser.id, role.value);
+                                            setRoleModalUser(null); // Seçimden sonra kapat
+                                        }}
+                                        className={`w-full flex items-center justify-between px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest transition-all border ${role.color} ${roleModalUser.teamRole === role.value
+                                                ? role.bg.replace('hover:', '') + ' ring-2 ring-white/20 scale-[1.02]'
+                                                : 'bg-black/40 border-white/5 hover:border-white/20 hover:bg-white/5 hover:scale-[1.02]'
+                                            }`}
+                                    >
+                                        <span className="flex items-center gap-3">
+                                            <span className="text-xl">{role.icon}</span>
+                                            {role.label}
+                                        </span>
+                                        {roleModalUser.teamRole === role.value && <ShieldCheck size={20} className="text-current" />}
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* KLİP DÜZENLEME MODALI */}
             <AnimatePresence>
@@ -344,13 +396,14 @@ export default function AdminPanel() {
                             <Users className="text-primary" size={20} /> Kadro Yönetimi
                         </h2>
                     </div>
+                    {/* Taşma sorununu çözdük, popup artık ekranın ortasında açılıyor */}
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-left border-collapse min-w-[600px]">
                             <thead>
                                 <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                                     <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest">Oyuncu</th>
                                     <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest">Riot ID & Ajan</th>
-                                    <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest text-center">Durum</th>
+                                    <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest text-center">Unvan / Durum</th>
                                     <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">İşlem</th>
                                 </tr>
                             </thead>
@@ -358,43 +411,55 @@ export default function AdminPanel() {
                                 {users.length === 0 ? (
                                     <tr><td colSpan={4} className="p-8 text-center text-gray-500">Bekleyen başvuru yok.</td></tr>
                                 ) : (
-                                    users.map((user) => (
-                                        <motion.tr key={user.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center gap-4">
-                                                    <img src={user.image} alt={user.name} className="w-12 h-12 rounded-full border border-gray-200 dark:border-gray-700 object-cover" />
-                                                    <span className="font-bold text-gray-900 dark:text-white">{user.name}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-primary flex items-center gap-1"><Gamepad2 size={14} /> {user.riotId}</span>
-                                                    <span className="text-sm text-gray-500">{user.favoriteAgent}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5 text-center">
-                                                <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full border ${user.teamRole === "OYUNCU"
-                                                    ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                                                    : "bg-orange-500/10 text-orange-500 border-orange-500/20"
-                                                    }`}>
-                                                    {user.teamRole === "OYUNCU" ? "Kadroda" : "Bekliyor"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-5 text-right">
-                                                <button
-                                                    onClick={() => handleToggleRole(user.id, user.teamRole)}
-                                                    disabled={actionLoading === user.id}
-                                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-lg ${user.teamRole === "OYUNCU"
-                                                        ? "bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white"
-                                                        : "bg-primary hover:bg-primary-hover text-white"
-                                                        }`}
-                                                >
-                                                    {actionLoading === user.id ? <Loader2 size={16} className="animate-spin" /> :
-                                                        user.teamRole === "OYUNCU" ? <><UserX size={16} /> Çıkar</> : <><UserCheck size={16} /> Ekle</>}
-                                                </button>
-                                            </td>
-                                        </motion.tr>
-                                    ))
+                                    users.map((user) => {
+                                        const activeRole = ROLE_OPTIONS.find(r => r.value === (user.teamRole || "ÜYE")) || ROLE_OPTIONS[0];
+
+                                        return (
+                                            <motion.tr key={user.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+
+                                                <td className="px-6 py-5">
+                                                    <div className="flex items-center gap-4">
+                                                        <img src={user.image} alt={user.name} className="w-12 h-12 rounded-full border border-gray-200 dark:border-gray-700 object-cover" />
+                                                        <span className="font-bold text-gray-900 dark:text-white">{user.name}</span>
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-5">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-primary flex items-center gap-1"><Gamepad2 size={14} /> {user.riotId}</span>
+                                                        <span className="text-sm text-gray-500">{user.favoriteAgent}</span>
+                                                    </div>
+                                                </td>
+
+                                                {/* YENİ: BASİT VE ŞIK BUTON (Tıklanınca Popup Açar) */}
+                                                <td className="px-6 py-5 text-center">
+                                                    <button
+                                                        onClick={() => setRoleModalUser(user)}
+                                                        disabled={actionLoading === user.id}
+                                                        className={`w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest outline-none border transition-all duration-300 shadow-lg mx-auto hover:scale-[1.02] ${activeRole.bg} ${activeRole.color}`}
+                                                    >
+                                                        {actionLoading === user.id ? (
+                                                            <Loader2 size={14} className="animate-spin text-current" />
+                                                        ) : (
+                                                            <>
+                                                                <span>{activeRole.icon}</span>
+                                                                {activeRole.label}
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </td>
+
+                                                <td className="px-6 py-5 text-right">
+                                                    <button
+                                                        onClick={() => window.open(`/oyuncu/${user.id}`, '_blank')}
+                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+                                                    >
+                                                        <Play size={12} fill="currentColor" /> Profili İncele
+                                                    </button>
+                                                </td>
+                                            </motion.tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>
