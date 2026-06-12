@@ -90,9 +90,10 @@ model Match {
 }
 
 model Clip {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  title     String   // Videonun Başlığı
-  youtubeId String   // Regex ile çıkaracağımız ID (Örn: dQw4w9WgXcQ)
-  tag       String   // Örn: "ACE", "CLUTCH", "KOMİK"
-  createdAt DateTime @default(now())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String   // Videonun Başlığı
+  youtubeId   String   // Regex ile çıkaracağımız ID (Örn: dQw4w9WgXcQ)
+  tag         String   // Örn: "ACE", "CLUTCH", "KOMİK"
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }

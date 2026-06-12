@@ -1,13 +1,15 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldAlert, Users, ShieldCheck, UserX, UserCheck, Gamepad2, Loader2, Sword, Calendar, Plus, Trash2, MapPin, Trophy, Save, X, Image as ImageIcon, Play } from "lucide-react";
+import { ShieldAlert, Users, ShieldCheck, UserX, UserCheck, Gamepad2, Loader2, Sword, Calendar, Plus, Trash2, MapPin, Trophy, Save, X, Image as ImageIcon, Play, Film, Star, Edit3 } from "lucide-react";
 import { togglePlayerRole } from "@/app/actions/adminActions";
 import { getAnnouncements } from "@/app/actions/announcement";
 import { getMatches, createMatch, deleteMatch, updateMatchScore } from "@/app/actions/matchActions";
+import { getClips, deleteClip, toggleFeaturedClip, updateClip } from "@/app/actions/clipActions";
 import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
-import AddClipForm from "@/components/AddClipForm"; // YENİ: Klip Formu Eklendi
+import AddClipForm from "@/components/AddClipForm";
 import { toast } from "sonner";
 
 const VALORANT_MAPS = [
@@ -32,6 +34,7 @@ export default function AdminPanel() {
     const [users, setUsers] = useState<any[]>([]);
     const [announcements, setAnnouncements] = useState<any[]>([]);
     const [matches, setMatches] = useState<any[]>([]);
+    const [clips, setClips] = useState<any[]>([]);
 
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -43,18 +46,22 @@ export default function AdminPanel() {
     const [scoreInputs, setScoreInputs] = useState<{ [key: string]: string }>({});
     const [statusInputs, setStatusInputs] = useState<{ [key: string]: string }>({});
 
+    const [editingClip, setEditingClip] = useState<any | null>(null);
+
     useEffect(() => {
         async function fetchData() {
             try {
-                const [resUsers, dataAnnouncements, dataMatches] = await Promise.all([
+                const [resUsers, dataAnnouncements, dataMatches, dataClips] = await Promise.all([
                     fetch("/api/admin/users"),
                     getAnnouncements(),
-                    getMatches()
+                    getMatches(),
+                    getClips()
                 ]);
 
                 if (resUsers.ok) setUsers(await resUsers.json());
                 setAnnouncements(dataAnnouncements);
                 setMatches(dataMatches);
+                setClips(dataClips);
 
                 const sInputs: any = {};
                 const stInputs: any = {};
@@ -134,6 +141,35 @@ export default function AdminPanel() {
         }
     };
 
+    const handleDeleteClip = async (id: string) => {
+        const res = await deleteClip(id);
+        if (res?.success) {
+            setClips(clips.filter(c => c.id !== id));
+            toast.success("Klip başarıyla yayından kaldırıldı.");
+        } else toast.error("Klip silinirken hata oluştu.");
+    };
+
+    const handleToggleStar = async (id: string, currentStatus: boolean) => {
+        const res = await toggleFeaturedClip(id, currentStatus);
+        if (res?.success) {
+            setClips(clips.map(c => ({ ...c, isFeatured: c.id === id ? !currentStatus : false })));
+            toast.success(!currentStatus ? "Sahne Işıkları bu klibe çevrildi! 🌟" : "Günün Klibi etiketi kaldırıldı.");
+        } else toast.error("İşlem başarısız.");
+    };
+
+    const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const res = await updateClip(editingClip.id, formData);
+
+        if (res?.success) {
+            toast.success("Klip başarıyla güncellendi!");
+            setEditingClip(null);
+            const updatedClips = await getClips();
+            setClips(updatedClips);
+        } else toast.error(res?.error || "Hata oluştu.");
+    };
+
     if (status === "loading" || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>;
 
     if (!(session?.user as any)?.isAdmin) return (
@@ -147,6 +183,40 @@ export default function AdminPanel() {
     return (
         <main className="w-full min-h-screen pt-32 px-4 pb-24 relative">
 
+            {/* KLİP DÜZENLEME MODALI */}
+            <AnimatePresence>
+                {editingClip && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-[#1a1c23] border border-white/10 rounded-3xl p-6 md:p-8 w-full max-w-lg shadow-[0_0_50px_rgba(255,70,85,0.15)] relative">
+                            <button onClick={() => setEditingClip(null)} className="absolute top-6 right-6 text-gray-400 hover:text-white"><X size={24} /></button>
+                            <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-2"><Edit3 className="text-primary" /> Klibi Düzenle</h3>
+
+                            <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Klip Başlığı</label>
+                                    <input name="title" defaultValue={editingClip.title} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none" required />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase">YouTube Linki</label>
+                                    <input name="url" defaultValue={`https://youtube.com/watch?v=${editingClip.youtubeId}`} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none" required />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Kategori</label>
+                                    <select name="tag" defaultValue={editingClip.tag} className="bg-[#111217] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none">
+                                        <option value="CLUTCH">CLUTCH</option>
+                                        <option value="ACE">ACE</option>
+                                        <option value="HIGHLIGHT">HIGHLIGHT</option>
+                                        <option value="KOMİK">KOMİK / TROLL</option>
+                                    </select>
+                                </div>
+                                <button type="submit" className="mt-4 py-3.5 bg-primary hover:bg-primary/90 text-white font-black rounded-xl uppercase tracking-widest shadow-lg">Değişiklikleri Kaydet</button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* HARİTA SEÇİM MODALI */}
             <AnimatePresence>
                 {isMapModalOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
@@ -334,8 +404,8 @@ export default function AdminPanel() {
                 {/* 3. MODÜL: DUYURULAR */}
                 <AdminAnnouncements initialAnnouncements={announcements} />
 
-                {/* 4. MODÜL: MEDYA VE KLİP MERKEZİ (YENİ EKLENEN KISIM) */}
-                <div className="bg-[#0B0C10]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden p-6 relative flex flex-col items-center">
+                {/* 4. MODÜL: MEDYA VE KLİP MERKEZİ */}
+                <div className="bg-[#0B0C10]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden p-6 md:p-8 relative">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-red-500/10 blur-[100px] pointer-events-none"></div>
 
                     <div className="w-full flex items-center gap-3 mb-8 relative z-10">
@@ -343,8 +413,49 @@ export default function AdminPanel() {
                         <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Medya Merkezi</h2>
                     </div>
 
-                    <div className="w-full flex justify-center relative z-10">
-                        <AddClipForm />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+                        <div className="w-full flex justify-center lg:justify-start">
+                            <AddClipForm />
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 h-[400px] flex flex-col shadow-inner">
+                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <Film size={16} /> Yayındaki Klipler ({clips.length})
+                            </h3>
+
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3">
+                                {clips.length === 0 ? (
+                                    <div className="h-full flex items-center justify-center text-gray-500 text-sm font-medium">Henüz yayınlanmış bir klip yok.</div>
+                                ) : (
+                                    clips.map(clip => (
+                                        <motion.div key={clip.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className={`flex gap-3 items-center bg-black/40 hover:bg-black/60 p-3 rounded-2xl border transition-colors group ${clip.isFeatured ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.1)]' : 'border-white/5'}`}>
+
+                                            <div className="relative min-w-[80px] h-14 rounded-xl overflow-hidden border border-white/10">
+                                                <img src={`https://img.youtube.com/vi/${clip.youtubeId}/mqdefault.jpg`} className="absolute inset-0 w-full h-full object-cover" alt="thumbnail" />
+                                                {clip.isFeatured && <div className="absolute top-1 right-1 bg-yellow-500 text-black p-0.5 rounded-full"><Star size={10} fill="currentColor" /></div>}
+                                            </div>
+
+                                            <div className="flex-1 overflow-hidden">
+                                                <h4 className={`text-sm font-bold truncate ${clip.isFeatured ? 'text-yellow-500' : 'text-white'}`}>{clip.title}</h4>
+                                                <span className="text-[10px] text-primary font-black uppercase tracking-widest">{clip.tag}</span>
+                                            </div>
+
+                                            <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleToggleStar(clip.id, clip.isFeatured)} className={`p-2 rounded-lg transition-colors ${clip.isFeatured ? 'bg-yellow-500/20 text-yellow-500' : 'bg-white/5 text-gray-400 hover:text-yellow-500 hover:bg-yellow-500/10'}`} title="Günün Klibi Yap">
+                                                    <Star size={16} fill={clip.isFeatured ? "currentColor" : "none"} />
+                                                </button>
+                                                <button onClick={() => setEditingClip(clip)} className="p-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white rounded-lg transition-colors" title="Düzenle">
+                                                    <Edit3 size={16} />
+                                                </button>
+                                                <button onClick={() => handleDeleteClip(clip.id)} className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors" title="Sil">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
