@@ -100,7 +100,11 @@ export default async function LeaderboardPage() {
 
                                         {/* Avatar + Rank Rozeti Kombinasyonu */}
                                         <div className="relative mb-6 mt-4">
-                                            <img src={topThree[1].user.image || "/default-avatar.png"} alt={topThree[1].user.name} className="w-24 h-24 rounded-full object-cover border-4 border-[#111217] shadow-xl ring-2 ring-gray-300" />
+                                            <img
+                                                src={topThree[1].user.image || "/default-avatar.png"}
+                                                alt={topThree[1].user.name ?? "Oyuncu"}
+                                                className="w-24 h-24 rounded-full object-cover border-4 border-[#111217] shadow-xl ring-2 ring-gray-300"
+                                            />
                                             <img src={topThree[1].rankImage} className="absolute -bottom-4 -right-4 w-12 h-12 drop-shadow-2xl" alt="Rank" />
                                         </div>
 
@@ -122,7 +126,11 @@ export default async function LeaderboardPage() {
 
                                         {/* Şampiyon Avatar + Rank Rozeti Kombinasyonu */}
                                         <div className="relative mb-6 mt-4">
-                                            <img src={topThree[0].user.image || "/default-avatar.png"} alt={topThree[0].user.name} className="w-32 h-32 rounded-full object-cover border-4 border-[#111217] shadow-xl ring-4 ring-yellow-500" />
+                                            <img
+                                                src={topThree[0].user.image || "/default-avatar.png"}
+                                                alt={topThree[0].user.name ?? "Oyuncu"}
+                                                className="w-32 h-32 rounded-full object-cover border-4 border-[#111217] shadow-xl ring-4 ring-yellow-500"
+                                            />
                                             <img src={topThree[0].rankImage} className="absolute -bottom-5 -right-5 w-16 h-16 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" alt="Rank" />
                                         </div>
 
@@ -144,7 +152,11 @@ export default async function LeaderboardPage() {
 
                                         {/* Avatar + Rank Rozeti Kombinasyonu */}
                                         <div className="relative mb-6 mt-4">
-                                            <img src={topThree[2].user.image || "/default-avatar.png"} alt={topThree[2].user.name} className="w-20 h-20 rounded-full object-cover border-4 border-[#111217] shadow-xl ring-2 ring-orange-700" />
+                                            <img
+                                                src={topThree[2].user.image || "/default-avatar.png"}
+                                                alt={topThree[2].user.name ?? "Oyuncu"}
+                                                className="w-20 h-20 rounded-full object-cover border-4 border-[#111217] shadow-xl ring-2 ring-orange-700"
+                                            />
                                             <img src={topThree[2].rankImage} className="absolute -bottom-3 -right-3 w-10 h-10 drop-shadow-2xl" alt="Rank" />
                                         </div>
 
@@ -170,7 +182,11 @@ export default async function LeaderboardPage() {
                                                 #{index + 4}
                                             </div>
                                             <div className="relative">
-                                                <img src={p.user.image || "/default-avatar.png"} alt={p.user.name} className="w-16 h-16 rounded-full object-cover border border-white/10" />
+                                                <img
+                                                    src={p.user.image || "/default-avatar.png"}
+                                                    alt={p.user.name ?? "Oyuncu"}
+                                                    className="w-16 h-16 rounded-full object-cover border border-white/10"
+                                                />
                                                 <img src={p.rankImage} alt="Rank" className="absolute -bottom-2 -right-2 w-8 h-8 drop-shadow-md" />
                                             </div>
                                         </div>
